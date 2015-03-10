@@ -72,34 +72,38 @@ ZombiesUI.prototype = {
         document.body.appendChild(this.offscreen);
 
         this.ctxoff = this.offscreen.getContext('2d');
+        
+        this.on_mousemove = function (e) {
+            var xpos = e.offsetX;
+            var ypos = e.offsetY;
+            if (xpos == undefined) {
+                xpos = e.pageX;
+                ypos = e.pageY;
+            }
+            this.ctx.mouse.x = xpos;
+            this.ctx.mouse.y = ypos;
+        }
+        
+        this.on_mousedown = function(e) {
+            this.ctx.mouse.clicked = !this.ctx.mouse.down;
+            this.ctx.mouse.down = true;
+        }
+        
+        this.on_mouseup = function(e) {
+            this.ctx.mouse.down = false;
+            this.ctx.mouse.clicked = false;
+        }
 
         // add even listeners for the mouse
-        this.canvas.addEventListener("mousemove", this.bind(
-            function(e) {
-                var xpos = e.offsetX;
-                var ypos = e.offsetY;
-                if (xpos == undefined) {
-                    xpos = e.pageX;
-                    ypos = e.pageY;
-                }
-                this.ctx.mouse.x = xpos;
-                this.ctx.mouse.y = ypos;
-            }
-        ));
-
-        this.canvas.addEventListener("mousedown", this.bind(
-            function(e) {
-                this.ctx.mouse.clicked = !this.ctx.mouse.down;
-                this.ctx.mouse.down = true;
-            }
-        ));
-
-        this.canvas.addEventListener("mouseup", this.bind(
-            function(e) {
-                this.ctx.mouse.down = false;
-                this.ctx.mouse.clicked = false;
-            }
-        ));
+        this.canvas.addEventListener("mousemove", this.bind(this.on_mousemove));
+        this.canvas.addEventListener("mousedown", this.bind(this.on_mousedown));
+        this.canvas.addEventListener("mouseup", this.bind(this.on_mouseup));
+        
+        if (TouchEvent) {
+            this.canvas.addEventListener("touchmove", this.bind(this.on_mousemove));
+            this.canvas.addEventListener("touchstart", this.bind(this.on_mousedown));
+            this.canvas.addEventListener("touchend", this.bind(this.on_mouseup));
+        }
 
         window.onresize = this.bind(
             function(event) {this.set_canvas_size(); }
